@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=tinytext
+GenericName=Text Editor
+Comment=A tiny plaintext editor
+Exec=tinytext %F
+Icon=accessories-text-editor
+Terminal=false
+Categories=Utility;TextEditor;
+MimeType=text/plain;
+Keywords=text;editor;plaintext;notes;
+StartupNotify=true
+StartupWMClass=dev.tinytext.TinyText

@@ -28,7 +28,8 @@ The only requirement is Docker:
 
     scripts/build.sh            # builds dist/tinytext
     scripts/install.sh          # installs to ~/.local (binary + launcher entry)
-    scripts/install.sh --uninstall
+    scripts/install.sh --set-default   # ...and make it the default for .txt/.md files
+    scripts/install.sh --uninstall     # also removes defaults pointing at tinytext
 
 `scripts/build.sh` also passes arbitrary cargo commands through, e.g.
 `scripts/build.sh build` for a debug build.

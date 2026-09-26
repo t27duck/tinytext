@@ -173,15 +173,60 @@ pub fn show_error(app: &gtk::Application, parent: Option<&gtk::Window>, primary:
 }
 
 fn show_about(app: &gtk::Application) {
-    let dialog = gtk::AboutDialog::builder()
-        .program_name("tinytext")
-        .version(env!("CARGO_PKG_VERSION"))
-        .comments("A tiny plaintext editor")
-        .logo_icon_name("accessories-text-editor")
+    let window = gtk::Window::builder()
+        .application(app)
+        .title("About tinytext")
         .modal(true)
+        .resizable(false)
         .build();
-    dialog.set_transient_for(app.active_window().as_ref());
-    dialog.present();
+    window.set_transient_for(app.active_window().as_ref());
+
+    let icon = gtk::Image::builder()
+        .icon_name("accessories-text-editor")
+        .pixel_size(64)
+        .build();
+    let name = gtk::Label::new(None);
+    name.set_markup("<span size='x-large' weight='bold'>tinytext</span>");
+    let version = gtk::Label::new(Some(&format!("Version {}", env!("CARGO_PKG_VERSION"))));
+    version.add_css_class("dim-label");
+    let comments = gtk::Label::new(Some("A tiny plaintext editor"));
+
+    let close = gtk::Button::with_label("Close");
+    close.set_halign(gtk::Align::Center);
+    close.set_margin_top(8);
+    let window_ref = window.clone();
+    close.connect_clicked(move |_| window_ref.close());
+
+    let content = gtk::Box::builder()
+        .orientation(gtk::Orientation::Vertical)
+        .spacing(6)
+        .margin_top(24)
+        .margin_bottom(18)
+        .margin_start(36)
+        .margin_end(36)
+        .build();
+    content.append(&icon);
+    content.append(&name);
+    content.append(&version);
+    content.append(&comments);
+    content.append(&close);
+    window.set_child(Some(&content));
+    window.set_default_widget(Some(&close));
+
+    // Escape closes the window, like a stock dialog.
+    let keys = gtk::EventControllerKey::new();
+    let window_ref = window.clone();
+    keys.connect_key_pressed(move |_, key, _, _| {
+        if key == gtk::gdk::Key::Escape {
+            window_ref.close();
+            return glib::Propagation::Stop;
+        }
+        glib::Propagation::Proceed
+    });
+    window.add_controller(keys);
+
+    window.present();
+    close.grab_focus();
 }
 
 /// Asks whether to restore unsaved windows from a previous session.

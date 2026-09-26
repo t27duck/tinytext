@@ -43,3 +43,7 @@ Omarchy. On minimal systems install `gtk4` (Arch) or `libgtk-4-1`
 
 - Unsaved buffers: `$XDG_STATE_HOME/tinytext/session` (default `~/.local/state`)
 - Settings: `$XDG_CONFIG_HOME/tinytext/settings.conf`
+
+## License
+
+MIT. See [LICENSE](LICENSE).

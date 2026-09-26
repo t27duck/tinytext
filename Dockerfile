@@ -13,6 +13,8 @@ RUN apt-get update \
 ENV RUSTUP_HOME=/usr/local/rustup \
     PATH=/usr/local/cargo/bin:$PATH
 RUN curl -sSf https://sh.rustup.rs | CARGO_HOME=/usr/local/cargo sh -s -- -y --profile minimal --default-toolchain stable \
+    && CARGO_HOME=/usr/local/cargo cargo install cargo-about --locked --features cli \
+    && rm -rf /usr/local/cargo/registry \
     && chmod -R a+rX /usr/local/rustup /usr/local/cargo
 
 WORKDIR /src

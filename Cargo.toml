@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "A tiny plaintext editor"
 license = "MIT"
+publish = false
 
 [dependencies]
 glib-unix = "0.22.8"

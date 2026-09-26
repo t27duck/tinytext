@@ -14,6 +14,7 @@ PREFIX="${PREFIX:-$HOME/.local}"
 DESKTOP_ID=dev.tinytext.TinyText.desktop
 BIN="$PREFIX/bin/tinytext"
 DESKTOP="$PREFIX/share/applications/$DESKTOP_ID"
+LICENSES="$PREFIX/share/licenses/tinytext"
 MIMEAPPS="${XDG_CONFIG_HOME:-$HOME/.config}/mimeapps.list"
 
 uninstall=false
@@ -28,7 +29,8 @@ done
 
 if $uninstall; then
     rm -f "$BIN" "$DESKTOP"
-    echo "Removed $BIN and $DESKTOP"
+    rm -rf "$LICENSES"
+    echo "Removed $BIN, $DESKTOP and $LICENSES"
     if [ -f "$MIMEAPPS" ] && grep -q "=$DESKTOP_ID" "$MIMEAPPS"; then
         sed -i "/=$DESKTOP_ID;*\$/d" "$MIMEAPPS"
         echo "Removed tinytext defaults from $MIMEAPPS"
@@ -42,7 +44,8 @@ else
     mkdir -p "$(dirname "$DESKTOP")"
     sed "s|^Exec=tinytext|Exec=$BIN|" packaging/$DESKTOP_ID > "$DESKTOP"
     chmod 644 "$DESKTOP"
-    echo "Installed $BIN and $DESKTOP"
+    install -Dm644 -t "$LICENSES" dist/LICENSE dist/THIRD-PARTY-LICENSES
+    echo "Installed $BIN, $DESKTOP and $LICENSES"
 fi
 
 if command -v update-desktop-database >/dev/null; then

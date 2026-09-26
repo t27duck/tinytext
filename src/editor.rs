@@ -446,9 +446,9 @@ impl Editor {
             .secondary_text("If you don't save, your changes will be lost.")
             .build();
         dialog.add_buttons(&[
-            ("Don't Save", gtk::ResponseType::Reject),
-            ("Cancel", gtk::ResponseType::Cancel),
-            ("Save", gtk::ResponseType::Accept),
+            ("_Don't Save", gtk::ResponseType::Reject),
+            ("_Cancel", gtk::ResponseType::Cancel),
+            ("_Save", gtk::ResponseType::Accept),
         ]);
         dialog.set_default_response(gtk::ResponseType::Accept);
         if let Some(button) = dialog.widget_for_response(gtk::ResponseType::Accept) {

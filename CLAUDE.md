@@ -18,10 +18,8 @@ There is no Rust toolchain on the host. Every cargo command runs in Docker:
 
 - The build image is Ubuntu 24.04 so the binary runs on glibc 2.39 / GTK 4.14
   (Ubuntu 24.04+, Debian 13+, Arch). Never use APIs newer than GTK 4.14.
-- `gtk` is still at `features = ["v4_6"]` because the code uses `MessageDialog`,
-  `FileChooserNative` and `CssProvider::load_from_data`, which are deprecated
-  from 4.10/4.12. Raising the feature (max `v4_14`) means migrating those to
-  `AlertDialog`/`FileDialog`/`load_from_string` first. No libadwaita.
+- Keep `gtk` at `features = ["v4_14"]`. Use `AlertDialog`/`FileDialog` (not
+  the deprecated `MessageDialog`/`FileChooserNative`). No libadwaita.
 - Unix signal handling comes from the `glib-unix` crate (glib 0.22 dropped it).
 - `cargo-about` (in the image, needs `--features cli`) generates the notices;
   new dependencies must use a license listed in `about.toml` or the build fails.

@@ -26,7 +26,6 @@ pub struct Editor {
     snapshot_timer: RefCell<Option<glib::SourceId>>,
     force_close: Cell<bool>,
     prompting: Cell<bool>,
-    file_dialog: RefCell<Option<gtk::FileChooserNative>>,
 }
 
 impl Editor {
@@ -89,7 +88,6 @@ impl Editor {
             snapshot_timer: RefCell::new(None),
             force_close: Cell::new(false),
             prompting: Cell::new(false),
-            file_dialog: RefCell::new(None),
         });
         editor.setup_actions();
         editor.setup_signals();
@@ -345,33 +343,24 @@ impl Editor {
     }
 
     fn open_dialog(self: &Rc<Self>) {
-        let dialog = gtk::FileChooserNative::new(
-            Some("Open File"),
-            Some(&self.window),
-            gtk::FileChooserAction::Open,
-            Some("_Open"),
-            Some("_Cancel"),
-        );
-        dialog.set_modal(true);
+        let dialog = gtk::FileDialog::builder()
+            .title("Open File")
+            .accept_label("_Open")
+            .modal(true)
+            .build();
         if let Some(dir) = self.path().as_deref().and_then(Path::parent) {
-            let _ = dialog.set_current_folder(Some(&gio::File::for_path(dir)));
+            dialog.set_initial_folder(Some(&gio::File::for_path(dir)));
         }
 
         let weak = Rc::downgrade(self);
-        dialog.connect_response(move |dialog, response| {
+        dialog.open(Some(&self.window), gio::Cancellable::NONE, move |result| {
             let Some(ed) = weak.upgrade() else { return };
-            ed.file_dialog.take();
-            if response != gtk::ResponseType::Accept {
-                return;
-            }
             if let (Some(path), Some(application)) =
-                (dialog.file().and_then(|f| f.path()), ed.window.application())
+                (result.ok().and_then(|f| f.path()), ed.window.application())
             {
                 app::open_path(&application, &path, Some(&ed));
             }
         });
-        dialog.show();
-        self.file_dialog.replace(Some(dialog));
     }
 
     /// Saves to the current path, asking for one if the buffer is untitled.
@@ -384,35 +373,23 @@ impl Editor {
     }
 
     fn save_as(self: &Rc<Self>, then: Option<AfterSave>) {
-        let dialog = gtk::FileChooserNative::new(
-            Some("Save As"),
-            Some(&self.window),
-            gtk::FileChooserAction::Save,
-            Some("_Save"),
-            Some("_Cancel"),
-        );
-        dialog.set_modal(true);
+        let dialog = gtk::FileDialog::builder()
+            .title("Save As")
+            .accept_label("_Save")
+            .modal(true)
+            .build();
         match self.path() {
-            Some(path) => {
-                let _ = dialog.set_file(&gio::File::for_path(path));
-            }
-            None => dialog.set_current_name("Untitled.txt"),
+            Some(path) => dialog.set_initial_file(Some(&gio::File::for_path(path))),
+            None => dialog.set_initial_name(Some("Untitled.txt")),
         }
 
         let weak = Rc::downgrade(self);
-        let then = RefCell::new(then);
-        dialog.connect_response(move |dialog, response| {
+        dialog.save(Some(&self.window), gio::Cancellable::NONE, move |result| {
             let Some(ed) = weak.upgrade() else { return };
-            ed.file_dialog.take();
-            if response != gtk::ResponseType::Accept {
-                return;
-            }
-            if let Some(path) = dialog.file().and_then(|f| f.path()) {
-                ed.write_to(&path, then.take());
+            if let Some(path) = result.ok().and_then(|f| f.path()) {
+                ed.write_to(&path, then);
             }
         });
-        dialog.show();
-        self.file_dialog.replace(Some(dialog));
     }
 
     fn write_to(self: &Rc<Self>, path: &Path, then: Option<AfterSave>) {
@@ -437,39 +414,29 @@ impl Editor {
     }
 
     fn confirm_close(self: &Rc<Self>) {
+        const DONT_SAVE: i32 = 0;
+        const SAVE: i32 = 2;
+
         self.prompting.set(true);
-        let dialog = gtk::MessageDialog::builder()
-            .transient_for(&self.window)
+        let dialog = gtk::AlertDialog::builder()
             .modal(true)
-            .message_type(gtk::MessageType::Question)
-            .text(format!("Save changes to “{}” before closing?", self.display_name()))
-            .secondary_text("If you don't save, your changes will be lost.")
+            .message(format!("Save changes to “{}” before closing?", self.display_name()))
+            .detail("If you don't save, your changes will be lost.")
+            .buttons(["_Don't Save", "_Cancel", "_Save"])
+            .cancel_button(1)
+            .default_button(SAVE)
             .build();
-        dialog.add_buttons(&[
-            ("_Don't Save", gtk::ResponseType::Reject),
-            ("_Cancel", gtk::ResponseType::Cancel),
-            ("_Save", gtk::ResponseType::Accept),
-        ]);
-        dialog.set_default_response(gtk::ResponseType::Accept);
-        if let Some(button) = dialog.widget_for_response(gtk::ResponseType::Accept) {
-            button.add_css_class("suggested-action");
-        }
-        if let Some(button) = dialog.widget_for_response(gtk::ResponseType::Reject) {
-            button.add_css_class("destructive-action");
-        }
 
         let weak = Rc::downgrade(self);
-        dialog.connect_response(move |dialog, response| {
-            dialog.destroy();
+        dialog.choose(Some(&self.window), gio::Cancellable::NONE, move |response| {
             let Some(ed) = weak.upgrade() else { return };
             ed.prompting.set(false);
             match response {
-                gtk::ResponseType::Accept => ed.save(Some(Box::new(|ed| ed.close_now()))),
-                gtk::ResponseType::Reject => ed.close_now(),
+                Ok(SAVE) => ed.save(Some(Box::new(|ed| ed.close_now()))),
+                Ok(DONT_SAVE) => ed.close_now(),
                 _ => {}
             }
         });
-        dialog.present();
     }
 
     fn close_now(&self) {

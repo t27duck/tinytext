@@ -159,17 +159,15 @@ pub fn open_path(app: &gtk::Application, path: &Path, reuse: Option<&Rc<Editor>>
 }
 
 pub fn show_error(app: &gtk::Application, parent: Option<&gtk::Window>, primary: &str, secondary: &str) {
-    let dialog = gtk::MessageDialog::builder()
-        .application(app)
+    let dialog = gtk::AlertDialog::builder()
         .modal(true)
-        .message_type(gtk::MessageType::Error)
-        .buttons(gtk::ButtonsType::Ok)
-        .text(primary)
-        .secondary_text(secondary)
+        .message(primary)
+        .detail(secondary)
         .build();
-    dialog.set_transient_for(parent);
-    dialog.connect_response(|dialog, _| dialog.destroy());
-    dialog.present();
+    // The alert window is not tied to the application, so keep the app alive
+    // while it is shown (e.g. a failed open with no other window).
+    let guard = app.hold();
+    dialog.choose(parent, gio::Cancellable::NONE, move |_| drop(guard));
 }
 
 fn show_about(app: &gtk::Application) {

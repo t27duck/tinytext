@@ -10,7 +10,7 @@ pub fn install() {
     let css = format!(".tinytext-editor {{ font-family: \"{family}\"; font-size: {size}pt; }}");
 
     let provider = gtk::CssProvider::new();
-    provider.load_from_data(&css);
+    provider.load_from_string(&css);
     if let Some(display) = gdk::Display::default() {
         gtk::style_context_add_provider_for_display(
             &display,

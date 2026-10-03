@@ -1,8 +1,8 @@
 # Build environment for tinytext.
-# Ubuntu 22.04 is used as the base so the resulting binary links against an
-# old glibc (2.35) and GTK 4.6, and therefore runs on Ubuntu 22.04+, Debian 12+
+# Ubuntu 24.04 is used as the base so the resulting binary links against
+# glibc 2.39 and GTK 4.14, and therefore runs on Ubuntu 24.04+, Debian 13+
 # and rolling distros such as Arch/Omarchy.
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \

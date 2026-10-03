@@ -1,7 +1,7 @@
 # tinytext
 
 A tiny plaintext editor for Linux, built with Rust and GTK4. It runs on
-Arch/Omarchy and Debian 12+/Ubuntu 22.04+.
+Arch/Omarchy and Debian 13+/Ubuntu 24.04+.
 
 ## Features
 
@@ -34,8 +34,8 @@ The only requirement is Docker:
 `scripts/build.sh` also passes arbitrary cargo commands through, e.g.
 `scripts/build.sh build` for a debug build.
 
-The binary is built on Ubuntu 22.04 and links against the system's GTK 4
-(4.6 or newer), which is installed by default on GNOME-based systems and
+The binary is built on Ubuntu 24.04 and links against the system's GTK 4
+(4.14 or newer), which is installed by default on GNOME-based systems and
 Omarchy. On minimal systems install `gtk4` (Arch) or `libgtk-4-1`
 (Debian/Ubuntu).
 

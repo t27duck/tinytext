@@ -8,8 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Same base as the Dockerfile so we compile against GTK 4.6 / glibc 2.35.
-    container: ubuntu:22.04
+    # Same base as the Dockerfile so we compile against GTK 4.14 / glibc 2.39.
+    container: ubuntu:24.04
     steps:
       - name: Install system packages
         timeout-minutes: 5

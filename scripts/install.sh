@@ -51,6 +51,10 @@ fi
 if command -v update-desktop-database >/dev/null; then
     update-desktop-database -q "$(dirname "$DESKTOP")" || true
 fi
+# KDE Plasma reads the application menu from its sycoca cache.
+if command -v kbuildsycoca6 >/dev/null; then
+    kbuildsycoca6 >/dev/null 2>&1 || true
+fi
 
 if ! $uninstall && $set_default; then
     if ! command -v xdg-mime >/dev/null; then

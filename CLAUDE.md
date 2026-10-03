@@ -45,23 +45,44 @@ while the window is dirty (`is_dirty`: modified, and not an empty untitled
 buffer); saving or discarding deletes it; a normal quit leaves the session dir
 empty. Anything left there at startup triggers the restore prompt.
 
-## Testing on the dev machine (Omarchy/Hyprland)
+## Testing on the dev machine (Arch; Omarchy/Hyprland or KDE Plasma)
 
+Check `$XDG_CURRENT_DESKTOP` (`Hyprland` or `KDE`) to pick the tools below.
+
+- If Docker reports "permission denied" (docker group not active in this
+  shell yet), run through it: `echo "scripts/build.sh" | newgrp docker`.
 - Isolate state: `XDG_STATE_HOME=<scratch dir> ./target/debug/tinytext`.
 - Make sure no installed tinytext is running first (`pgrep -x tinytext`),
   otherwise the new binary just forwards to the old process.
 - Stop it with `kill -TERM $(pgrep -x tinytext)`, never `pkill -f tinytext`
   (it matches and kills the invoking shell).
+- Trigger actions without the UI: `gdbus call --session --dest
+  dev.tinytext.TinyText --object-path /dev/tinytext/TinyText --method
+  org.gtk.Actions.Activate about '[]' '{}'`. Window actions (`open`, `save`,
+  `save-as`, `find`, `close`) live at `.../TinyText/window/<n>`.
+- File dialogs go through the desktop portal (a separate process), so they
+  can be screenshotted but not driven by the tools below.
+- Portal "AccessDenied" warnings when run from a sandboxed shell are harmless.
+
+### Hyprland (Omarchy)
+
 - `wtype` sends keys to whatever is focused: check
   `hyprctl activewindow -j | jq -r .class` is `dev.tinytext.TinyText` (or
   `tinytext` for dialogs) before each call. It cannot trigger compositor binds.
-- Trigger actions without the UI: `gdbus call --session --dest
-  dev.tinytext.TinyText --object-path /dev/tinytext/TinyText --method
-  org.gtk.Actions.Activate about [] {}`.
 - Hyprland uses Lua dispatchers: `hyprctl dispatch 'hl.dsp.window.close()'`.
 - Screenshot the active window with `grim -g "$(hyprctl activewindow -j | jq
   -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')" out.png`.
-- Portal "AccessDenied" warnings when run from a sandboxed shell are harmless.
+
+### KDE Plasma
+
+- No `hyprctl`/`wtype`/`grim`. Drive the UI over AT-SPI with
+  `scripts/atspi.py` (`dump` the widget tree, `type <text>` into the buffer,
+  `click <button label>`); e.g. `type` then the `close` window action brings
+  up the save prompt.
+- Screenshot the active window: `spectacle -b -n -a -o out.png` (give it a
+  second to write the file).
+- The app menu is cached by KSycoca; `scripts/install.sh` runs
+  `kbuildsycoca6` so a new or changed desktop entry shows up.
 
 ## Conventions
 

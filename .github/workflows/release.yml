@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Fail before the slow build if the tag and Cargo.toml disagree.
+      - name: Check version
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n1)
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match Cargo.toml version $version"
+            exit 1
+          fi
+
+      # Same Docker image as local builds (Ubuntu 24.04: GTK 4.14 / glibc 2.39).
+      - name: Build
+        run: scripts/build.sh build --release --locked
+
+      - name: Package
+        run: scripts/package.sh "$GITHUB_REF_NAME"
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" target/package/*.tar.gz target/package/*.sha256 \
+              --verify-tag --title "tinytext ${GITHUB_REF_NAME#v}" --generate-notes

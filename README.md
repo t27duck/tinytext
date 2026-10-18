@@ -22,6 +22,14 @@ Arch/Omarchy and Debian 13+/Ubuntu 24.04+.
 | Ctrl+W | Close window (the compositor's close shortcut works too) |
 | Ctrl+Z / Ctrl+Shift+Z | Undo / redo |
 
+## Install a release
+
+Download `tinytext-<version>-x86_64-linux.tar.gz` from the GitHub releases
+page, unpack it and run the installer inside (same options as below):
+
+    tar -xzf tinytext-*-x86_64-linux.tar.gz
+    tinytext-*-x86_64-linux/scripts/install.sh
+
 ## Build
 
 The only requirement is Docker:

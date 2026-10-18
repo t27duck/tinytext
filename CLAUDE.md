@@ -11,6 +11,9 @@ There is no Rust toolchain on the host. Every cargo command runs in Docker:
     scripts/build.sh add <crate>     # any cargo subcommand works
     scripts/install.sh               # install dist/ to ~/.local
 
+`scripts/package.sh` turns `dist/` into a tarball in `target/package/` that
+mirrors the repo layout (so its `scripts/install.sh` works unpacked).
+
 `CARGO_HOME` lives in `target/.cargo-home`, so crate sources are browsable at
 `target/.cargo-home/registry/src/*/` when checking an API.
 
@@ -83,6 +86,16 @@ Check `$XDG_CURRENT_DESKTOP` (`Hyprland` or `KDE`) to pick the tools below.
   second to write the file).
 - The app menu is cached by KSycoca; `scripts/install.sh` runs
   `kbuildsycoca6` so a new or changed desktop entry shows up.
+
+## Releasing
+
+1. Bump `version` in `Cargo.toml`, run `scripts/build.sh` to update
+   `Cargo.lock`, and commit both.
+2. `git tag -a v<version> -m "tinytext <version>"` and push `main` and the tag.
+3. `.github/workflows/release.yml` checks the tag matches `Cargo.toml`, builds
+   with `scripts/build.sh` (same Docker image), runs `scripts/package.sh`, and
+   publishes a GitHub release with the tarball, its `.sha256` and generated
+   notes.
 
 ## Conventions
 

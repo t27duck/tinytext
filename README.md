@@ -11,6 +11,8 @@ Arch/Omarchy and Debian 13+/Ubuntu 24.04+.
 - Closing a modified window asks to save or discard
 - Uses the system monospace font (GNOME's setting on GNOME desktops,
   fontconfig's `monospace` alias elsewhere)
+- Launched from a terminal, it detaches and gives the prompt back
+  (`tinytext -f` / `--foreground` stays attached)
 
 | Shortcut | Action |
 | --- | --- |

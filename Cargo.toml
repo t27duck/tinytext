@@ -9,6 +9,7 @@ publish = false
 [dependencies]
 glib-unix = "0.22.8"
 gtk = { version = "0.11.5", package = "gtk4", features = ["v4_14"] }
+libc = "0.2"
 
 [profile.release]
 opt-level = 3

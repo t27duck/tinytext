@@ -589,6 +589,7 @@ version = "0.1.0"
 dependencies = [
  "glib-unix",
  "gtk4",
+ "libc",
 ]
 
 [[package]]
